@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Teste from '../src/Module/Teste';
+import Cadastro from '../src/Module/Cadastro';
 import HorarioCadastro from '../src/Module/HorarioCadastro';
 import AgendaAnual from '../src/Module/AgendaAnual'
 import './Module/style.css'; 
@@ -28,7 +28,7 @@ function App() {
   return (
     <div>
       {/* Componente de Cadastro de Professor, Disciplina e Turma */}
-      <Teste />
+      <Cadastro />
 
       {/* Componente de Cadastro de Horário */}
       <HorarioCadastro

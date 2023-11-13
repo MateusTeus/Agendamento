@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-function Teste() {
+// Componente funcional Cadastro
+function Cadastro() {
+  // Estados para controlar informações do professor, disciplina, turma, e listas de professores, disciplinas, turmas
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+
   const [discipline, setDiscipline] = useState('');
   const [subject, setSubject] = useState('');
   const [classroom, setClassroom] = useState('');
@@ -15,7 +17,7 @@ function Teste() {
     e.preventDefault();
     const response = await fetch('http://localhost:5000/register/professor', {
       method: 'POST',
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify({ name }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -24,7 +26,6 @@ function Teste() {
     if (result) {
       alert('Professor cadastrado com sucesso');
       setName('');
-      setEmail('');
     }
   };
 
@@ -62,6 +63,7 @@ function Teste() {
     }
   };
 
+  // Efeito colateral para carregar listas de professores, disciplinas e turmas ao montar o componente
   useEffect(() => {
     // Recuperar a lista de professores
     fetch('http://localhost:5000/professors')
@@ -77,9 +79,12 @@ function Teste() {
       .then((data) => setClassrooms(data));
   }, []);
 
+
   return (
     <div>
       <h1>Cadastro de Professor, Disciplina e Turma</h1>
+
+
       <div>
         <h2>Cadastro de Professor</h2>
         <form onSubmit={handleProfessorSubmit}>
@@ -89,15 +94,10 @@ function Teste() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
           <button type="submit">Cadastrar Professor</button>
         </form>
       </div>
+
 
       <div>
         <h2>Cadastro de Disciplina</h2>
@@ -112,6 +112,7 @@ function Teste() {
         </form>
       </div>
 
+   
       <div>
         <h2>Cadastro de Turma</h2>
         <form onSubmit={handleClassroomSubmit}>
@@ -128,4 +129,5 @@ function Teste() {
   );
 }
 
-export default Teste;
+
+export default Cadastro;
