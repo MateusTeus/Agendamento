@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 function HorarioCadastro({ professors, disciplines, classrooms }) {
-  // Estados para armazenar dados do formulário
   const [selectedProfessor, setSelectedProfessor] = useState('');
   const [selectedDiscipline, setSelectedDiscipline] = useState('');
   const [selectedClassroom, setSelectedClassroom] = useState('');
@@ -10,10 +9,10 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
   const [endDate, setEndDate] = useState('');
   const [startDateFormatted, setStartDateFormatted] = useState('');
   const [endDateFormatted, setEndDateFormatted] = useState('');
-
-  // Lista de feriados
+  const [selectedTurno, setSelectedTurno] = useState('');
+  const [holidayDate, setHolidayDate] = useState('');
+  const [selectedHoliday, setSelectedHoliday] = useState('');
   const [holidays, setHolidays] = useState([
-    // Feriados
     '2023-01-01', // Ano-Novo
     '2023-01-01', // Dia da Confraternização Universal (1º de janeiro) FERIADO
     '2023-02-20', // Segunda-feira de Carnaval PONTO FACULTATIVO
@@ -80,21 +79,52 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
   ]);
 
 
-   // Função para verificar se uma data é feriado
+  const addHoliday = () => {
+    if (!holidayDate) {
+      alert('Por favor, insira uma data de feriado válida.');
+      return;
+    }
+
+    if (holidays.includes(holidayDate)) {
+      alert('Essa data de feriado já foi adicionada.');
+      return;
+    }
+
+    setHolidays([...holidays, holidayDate]);
+    alert('Essa data de feriado foi adiciona com sucesso.');
+    setHolidayDate('');
+  };
+
    const isHoliday = (date) => {
     const formattedDate = date.toISOString().split('T')[0];
     return holidays.includes(formattedDate);
   };
+  const removeHoliday = () => {
+    if (!selectedHoliday) {
+      alert('Selecione um feriado para remover.');
+      return;
+    }
 
-  // Função para verificar se uma data é final de semana ou feriado
+    const updatedHolidays = holidays.filter((holiday) => holiday !== selectedHoliday);
+    setHolidays(updatedHolidays);
+    setSelectedHoliday('');
+  };
   const isWeekendOrHoliday = (date) => {
-    const day = new Date(date).getDay(); // 0 (Sunday) to 6 (Saturday)
+    const day = new Date(date).getDay(); 
     return day === 0 || day === 6 || isHoliday(date);
   };
 
-  // Função para calcular a data de término com base na data de início e no número de dias
-  const calculateEndDate = (start, daysToAdd) => {
+  const calculateEndDate = (start, daysToAdd, selectedTurno) => {
     let end = new Date(start);
+
+    if (selectedTurno === 'manha') {
+      end.setHours(7, 0, 0);
+    } else if (selectedTurno === 'tarde') {
+      end.setHours(12, 0, 0);
+    } else if (selectedTurno === 'noite') {
+      end.setHours(18, 0, 0);
+    }
+
     let daysAdded = 0;
 
     while (daysAdded < daysToAdd) {
@@ -105,7 +135,6 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
       }
     }
 
-    // Caso a data final caia em um final de semana, ajuste para o próximo dia útil
     while (isWeekendOrHoliday(end)) {
       end.setDate(end.getDate() + 1);
     }
@@ -115,42 +144,33 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
     return adjustedEnd;
   };
 
-  // Função para lidar com a submissão do formulário
   const handleHorarioSubmit = async (e) => {
     e.preventDefault();
 
-    // Verifica se a data de início foi preenchida
     if (!startDate) {
       alert('Preencha a data de início antes de cadastrar o horário.');
       return;
     }
 
-    // Verifica se a quantidade de dias foi preenchida
     if (!numberOfDays) {
       alert('Preencha a quantidade de dias antes de cadastrar o horário.');
       return;
     }
+    
 
-    // Converte a quantidade de dias para número inteiro
     const daysToAdd = parseInt(numberOfDays, 10);
-
-    // Converte a data de início para objeto Date
     const start = new Date(startDate);
 
-    // Calcula a data de término
-    const end = calculateEndDate(start, daysToAdd);
+    const end = calculateEndDate(start, daysToAdd, selectedTurno);
 
-    // Adiciona um dia à data de início para exibição
     start.setDate(start.getDate() + 1);
 
-    // Formata as datas para exibição
     const startDateDisplay = start.toLocaleDateString('pt-BR', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
     });
 
-    // Restaura a data de início original para cálculos futuros, se necessário
     start.setDate(start.getDate() - 1);
 
     const endDateDisplay = end.toLocaleDateString('pt-BR', {
@@ -159,22 +179,21 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
       day: '2-digit',
     });
 
-    // Atualiza os estados com as datas formatadas
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
     setStartDateFormatted(startDateDisplay);
     setEndDateFormatted(endDateDisplay);
-  };
 
-  // Função para registrar o horário no banco de dados
+    setSelectedTurno(selectedTurno);
+  };
+  
+
   const registrarHorarioNoBancoDeDados = async () => {
-    // Verifica se todos os campos foram preenchidos
-    if (!selectedProfessor || !selectedDiscipline || !selectedClassroom || !numberOfDays) {
+    if (!selectedProfessor || !selectedDiscipline || !selectedClassroom || !numberOfDays || !selectedTurno) {
       alert('Preencha todos os campos antes de registrar.');
       return;
     }
 
-    // Envia a requisição para cadastrar o horário no banco de dados
     const response = await fetch('http://localhost:5000/register/horario', {
       method: 'POST',
       body: JSON.stringify({
@@ -184,16 +203,15 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
         startDate: startDate,
         endDate: endDate,
         numberOfDays: numberOfDays,
+        turno: selectedTurno,
       }),
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    // Verifica se a requisição foi bem-sucedida
     if (response.ok) {
       alert('Horário cadastrado com sucesso');
-      // Limpa os campos após o cadastro
       setSelectedProfessor('');
       setSelectedDiscipline('');
       setSelectedClassroom('');
@@ -202,6 +220,7 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
       setEndDate('');
       setStartDateFormatted('');
       setEndDateFormatted('');
+      setSelectedTurno('');
     } else {
       alert('Erro ao cadastrar o horário. Por favor, tente novamente.');
     }
@@ -211,6 +230,33 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
     <div>
       <h2>Cadastro de Horário</h2>
       <form onSubmit={handleHorarioSubmit}>
+      <p>Selecione um feriado para excluir</p>
+<select
+  value={selectedHoliday}
+  onChange={(e) => setSelectedHoliday(e.target.value)}
+>
+  <option value="">Selecione um feriado</option>
+  {holidays.map((holiday, index) => (
+    <option key={`${holiday}-${index}`} value={holiday}>
+      {holiday}
+    </option>
+  ))}
+</select>
+<button type="button" onClick={removeHoliday}>
+  Remover Feriado
+</button>
+        <div>
+          <p>Adicione um feriado na sua agenda</p>
+          <label>Data de Feriado:</label>
+          <input
+            type="date"
+            value={holidayDate}
+            onChange={(e) => setHolidayDate(e.target.value)}
+          />
+          <button type="button" onClick={addHoliday}>
+            Adicionar Feriado
+          </button>
+      </div>
         <div>
           <label>Professor:</label>
           <select
@@ -254,6 +300,18 @@ function HorarioCadastro({ professors, disciplines, classrooms }) {
           </select>
         </div>
         <div>
+        <div>
+      <label>Turno:</label>
+      <select
+        value={selectedTurno}
+        onChange={(e) => setSelectedTurno(e.target.value)}
+      >
+        <option value="">Selecione o Turno</option>
+        <option value="manha">Manhã</option>
+        <option value="tarde">Tarde</option>
+        <option value="noite">Noite</option>
+      </select>
+    </div>
           <label>Data de Início:</label>
           <input
             type="date"

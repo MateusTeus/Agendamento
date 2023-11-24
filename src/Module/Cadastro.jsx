@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-// Componente funcional Cadastro
 function Cadastro() {
-  // Estados para controlar informações do professor, disciplina, turma, e listas de professores, disciplinas, turmas
+
   const [name, setName] = useState('');
 
   const [discipline, setDiscipline] = useState('');
@@ -12,9 +11,12 @@ function Cadastro() {
   const [disciplines, setDisciplines] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
 
-  // Função para cadastrar um professor
   const handleProfessorSubmit = async (e) => {
     e.preventDefault();
+    if (!name) {
+      alert('Por favor, preencha o nome do professor.');
+      return;
+    }
     const response = await fetch('http://localhost:5000/register/professor', {
       method: 'POST',
       body: JSON.stringify({ name }),
@@ -29,8 +31,11 @@ function Cadastro() {
     }
   };
 
-  // Função para cadastrar uma disciplina
   const handleDisciplineSubmit = async (e) => {
+    if (!discipline) {
+      alert('Por favor, preencha o nome da disciplina.');
+      return;
+    }
     e.preventDefault();
     const response = await fetch('http://localhost:5000/register/discipline', {
       method: 'POST',
@@ -46,9 +51,12 @@ function Cadastro() {
     }
   };
 
-  // Função para cadastrar uma turma
   const handleClassroomSubmit = async (e) => {
     e.preventDefault();
+    if (!classroom) {
+      alert('Por favor, preencha o nome da turma.');
+      return;
+    }
     const response = await fetch('http://localhost:5000/register/classroom', {
       method: 'POST',
       body: JSON.stringify({ name: classroom }),
@@ -63,17 +71,13 @@ function Cadastro() {
     }
   };
 
-  // Efeito colateral para carregar listas de professores, disciplinas e turmas ao montar o componente
   useEffect(() => {
-    // Recuperar a lista de professores
     fetch('http://localhost:5000/professors')
       .then((response) => response.json())
       .then((data) => setProfessors(data));
-    // Recuperar a lista de disciplinas
     fetch('http://localhost:5000/disciplines')
       .then((response) => response.json())
       .then((data) => setDisciplines(data));
-    // Recuperar a lista de turmas
     fetch('http://localhost:5000/classrooms')
       .then((response) => response.json())
       .then((data) => setClassrooms(data));

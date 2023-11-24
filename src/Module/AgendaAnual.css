@@ -12,12 +12,12 @@ html {
 .calendar-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px; /* Espaçamento entre os quadrados */
+    gap: 10px; 
   }
   
   .calendar-day {
-    width: 100px; /* Largura de cada quadrado */
-    height: 100px; /* Altura de cada quadrado */
+    width: 100px; 
+    height: 100px; 
     background-color: #e0e0e0;
     display: flex;
     align-items: center;
