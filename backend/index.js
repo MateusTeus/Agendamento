@@ -4,8 +4,14 @@ const app = express();
 const cors = require('cors');
 
 app.use(express.json());
-app.use(cors());
-const mongooseUri = ''
+app.use(cors({
+  origin: 'https://agendamento-mateusrick.vercel.app',
+  //http://localhost:3000/
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+}));
+const mongooseUri = 'mongodb+srv://vercel-admin-user-6560c7d45e19662e064b76a5:L1O1mYPesPGbQDT2@cluster0.qanhdhl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 mongoose.connect(mongooseUri, {
   dbName: 'agendamento',
   useNewUrlParser: true,
@@ -119,6 +125,7 @@ app.get('/horarios', async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server is running on port 5000');
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
